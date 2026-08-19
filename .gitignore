@@ -1,0 +1,11 @@
+node_modules/
+temporary screenshots/
+.claude/
+banner.png
+
+# Raw Meshy AI export bundles (unused by the site; only the *_withSkin.glb
+# animation exports referenced in index.html are needed)
+Meshy_AI_The_Curious_Scholar_biped.zip
+Meshy_AI_Man_in_Black_Polo_biped.zip
+Meshy_AI_The_Curious_Scholar_biped_Character_output.glb
+Meshy_AI_Man_in_Black_Polo_biped_Character_output.glb

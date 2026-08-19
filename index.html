@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>$PATLU — CZ's 3D Twin</title>
+<meta name="description" content="$PATLU — the community meme coin built around CZ's cartoon twin, Patlu from Motu Patlu.">
+<link rel="icon" type="image/png" href="head-trans.png">
+<link rel="apple-touch-icon" href="head-trans.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script type="module" src="https://unpkg.com/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          void: '#0A0A0B',
+          coal: '#151512',
+          coal2: '#1D1C17',
+          gold: '#F0B90B',
+          goldhi: '#FFD75E',
+          amber: '#8A5F08',
+          parchment: '#F3EEDF',
+          rust: '#C4452A',
+        },
+        fontFamily: {
+          display: ['"Baloo 2"', 'ui-rounded', 'sans-serif'],
+          body: ['"Sora"', 'ui-sans-serif', 'sans-serif'],
+          mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+        },
+      },
+    },
+  };
+</script>
+
+<style>
+  :root { color-scheme: dark; }
+  * { -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: #0A0A0B;
+    font-family: 'Sora', sans-serif;
+  }
+
+  /* grain texture */
+  .grain {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 50;
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .glow-field {
+    background:
+      radial-gradient(60% 50% at 15% 10%, rgba(240,185,11,0.16), transparent 60%),
+      radial-gradient(45% 40% at 85% 0%, rgba(240,185,11,0.10), transparent 60%),
+      radial-gradient(70% 60% at 50% 100%, rgba(138,95,8,0.14), transparent 60%),
+      #0A0A0B;
+  }
+
+  .card-shadow {
+    box-shadow:
+      0 1px 2px rgba(0,0,0,0.5),
+      0 8px 24px -8px rgba(240,185,11,0.18),
+      0 32px 56px -28px rgba(0,0,0,0.75);
+  }
+
+  .card-shadow-lg {
+    box-shadow:
+      0 2px 4px rgba(0,0,0,0.55),
+      0 16px 40px -12px rgba(240,185,11,0.22),
+      0 48px 96px -32px rgba(0,0,0,0.85);
+  }
+
+  .spring {
+    transition-property: transform, opacity, box-shadow;
+    transition-duration: 420ms;
+    transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .spring-fast {
+    transition-property: transform, opacity, box-shadow;
+    transition-duration: 220ms;
+    transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid #F0B90B;
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  .reveal.in {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 900ms cubic-bezier(0.16, 1, 0.3, 1), transform 900ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee 26s linear infinite;
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  .ticker-dot::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: #F0B90B;
+    margin: 0 1.25rem;
+    vertical-align: middle;
+  }
+
+  .text-outline {
+    -webkit-text-stroke: 1.5px rgba(240,185,11,0.5);
+  }
+
+  .divider-dash {
+    background-image: repeating-linear-gradient(to bottom, rgba(240,185,11,0.35) 0 8px, transparent 8px 16px);
+    width: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .marquee-track { animation: none; }
+    .reveal { opacity: 1; transform: none; transition: none; }
+    * { transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; }
+  }
+
+  ::selection {
+    background: #F0B90B;
+    color: #0A0A0B;
+  }
+
+  .noise-border {
+    border: 1px solid rgba(240,185,11,0.18);
+  }
+
+  .stage {
+    background:
+      radial-gradient(58% 42% at 50% 82%, rgba(240,185,11,0.16), transparent 70%),
+      radial-gradient(90% 70% at 50% 8%, rgba(255,255,255,0.05), transparent 60%),
+      linear-gradient(180deg, #17160F 0%, #100F0A 62%, #0C0B08 100%);
+  }
+  .stage model-viewer {
+    --poster-color: transparent;
+  }
+</style>
+</head>
+<body class="glow-field text-parchment antialiased">
+<div class="grain"></div>
+
+<!-- ============ NAV ============ -->
+<header class="fixed top-0 inset-x-0 z-40">
+  <div class="mx-4 mt-4 sm:mx-6 sm:mt-5">
+    <nav class="max-w-6xl mx-auto flex items-center justify-between rounded-2xl noise-border bg-void/70 backdrop-blur-md px-4 py-2.5 sm:px-5">
+      <a href="#top" class="flex items-center gap-2.5 group">
+        <img src="head-trans.png" alt="$PATLU logo" class="h-9 w-9 object-contain drop-shadow-[0_0_10px_rgba(240,185,11,0.35)] spring-fast group-hover:-rotate-6">
+        <span class="font-display font-bold text-lg tracking-tight text-parchment">$PATLU</span>
+      </a>
+      <div class="hidden md:flex items-center gap-8 font-body text-sm text-parchment/70">
+        <a href="#origin" class="hover:text-gold spring-fast">The Origin</a>
+        <a href="#patlu" class="hover:text-gold spring-fast">Meet Patlu</a>
+        <a href="#disclaimer" class="hover:text-gold spring-fast">Disclaimer</a>
+      </div>
+      <a href="#join" class="font-mono text-xs sm:text-sm font-semibold bg-gold text-void px-4 py-2 rounded-full spring-fast hover:bg-goldhi hover:-translate-y-0.5 active:translate-y-0 active:scale-95 card-shadow">
+        $PATLU
+      </a>
+    </nav>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section id="top" class="relative pt-36 pb-16 sm:pt-44 sm:pb-24 px-4 sm:px-6 overflow-hidden">
+  <div class="max-w-6xl mx-auto text-center">
+    <div class="inline-flex items-center gap-2 font-mono text-[11px] sm:text-xs uppercase tracking-[0.18em] text-gold/90 bg-gold/10 border border-gold/25 rounded-full px-4 py-1.5 mb-8 reveal">
+      <span class="inline-block w-1.5 h-1.5 rounded-full bg-gold animate-pulse"></span>
+      Not financial advice. Just a really good bald joke.
+    </div>
+
+    <h1 class="reveal font-display font-extrabold leading-[0.95] tracking-tight text-[13vw] sm:text-7xl md:text-8xl">
+      <span class="block text-parchment">EVERY CEO HAS</span>
+      <span class="block text-parchment">A CARTOON TWIN.</span>
+      <span class="block text-gold drop-shadow-[0_0_28px_rgba(240,185,11,0.35)]">CZ'S IS PATLU.</span>
+    </h1>
+
+    <p class="reveal mt-8 max-w-xl mx-auto font-body text-base sm:text-lg text-parchment/65 leading-relaxed">
+      Bald head. Round glasses. Chill energy under pressure. CZ pointed out the resemblance himself —
+      the internet just built a coin around it.
+    </p>
+
+    <div class="reveal mt-9 flex flex-wrap items-center justify-center gap-4">
+      <a href="#join" class="font-mono text-sm font-semibold bg-gold text-void px-7 py-3.5 rounded-full spring hover:bg-goldhi hover:-translate-y-1 active:translate-y-0 active:scale-95 card-shadow-lg">
+        Join the Community
+      </a>
+      <a href="#origin" class="font-mono text-sm font-semibold text-parchment border border-parchment/25 px-7 py-3.5 rounded-full spring hover:border-gold hover:text-gold hover:-translate-y-1 active:translate-y-0 active:scale-95">
+        Read the Origin Story
+      </a>
+    </div>
+
+    <!-- hero visual: live 3D dancing twins -->
+    <div class="reveal mt-16 sm:mt-20 relative max-w-5xl mx-auto">
+      <div class="absolute -inset-4 sm:-inset-8 bg-gold/10 blur-3xl rounded-[3rem]"></div>
+      <div class="relative grid grid-cols-2 gap-3 sm:gap-6">
+        <div class="stage relative rounded-2xl sm:rounded-3xl overflow-hidden noise-border card-shadow-lg">
+          <span class="absolute top-3 left-3 sm:top-4 sm:left-5 z-10 font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.14em] text-gold/90 bg-void/70 border border-gold/25 rounded-full px-2.5 py-1 sm:px-3">
+            Patlu
+          </span>
+          <model-viewer
+            src="Meshy_AI_The_Curious_Scholar_biped_Animation_Boom_Dance_withSkin.glb"
+            alt="3D animated model of Patlu doing a boom dance"
+            camera-controls
+            disable-zoom
+            autoplay
+            interaction-prompt="none"
+            camera-orbit="0deg 80deg 155%"
+            field-of-view="26deg"
+            shadow-intensity="0.85"
+            shadow-softness="0.9"
+            exposure="1.1"
+            class="w-full h-[260px] sm:h-[440px] matte-model">
+          </model-viewer>
+        </div>
+        <div class="stage relative rounded-2xl sm:rounded-3xl overflow-hidden noise-border card-shadow-lg">
+          <span class="absolute top-3 left-3 sm:top-4 sm:left-5 z-10 font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.14em] text-gold/90 bg-void/70 border border-gold/25 rounded-full px-2.5 py-1 sm:px-3">
+            CZ
+          </span>
+          <model-viewer
+            id="cz-model"
+            src="Meshy_AI_Man_in_Black_Polo_biped_Animation_Hip_Hop_Dance_1_withSkin.glb"
+            alt="3D animated model of CZ doing a hip hop dance"
+            camera-controls
+            disable-zoom
+            autoplay
+            interaction-prompt="none"
+            camera-orbit="0deg 80deg 155%"
+            field-of-view="26deg"
+            shadow-intensity="0.85"
+            shadow-softness="0.9"
+            exposure="0.75"
+            class="w-full h-[260px] sm:h-[440px] matte-model">
+          </model-viewer>
+        </div>
+      </div>
+      <p class="mt-4 font-mono text-[11px] sm:text-xs text-parchment/40 tracking-wide text-center">
+        THEY NEVER STOP DANCING — DRAG TO LOOK AROUND
+      </p>
+    </div>
+  </div>
+
+  <!-- marquee ribbon -->
+  <div class="mt-16 sm:mt-24 border-y border-gold/15 bg-coal/60 py-3.5 overflow-hidden">
+    <div class="marquee-track font-display font-bold text-xl sm:text-2xl text-parchment/15 select-none">
+      <span class="ticker-dot">$PATLU</span><span class="ticker-dot">CZ'S 3D TWIN</span><span class="ticker-dot">BALD BY DESIGN</span><span class="ticker-dot">CHAABUK DIMAAG</span><span class="ticker-dot">TO THE MOTU-N</span>
+      <span class="ticker-dot">$PATLU</span><span class="ticker-dot">CZ'S 3D TWIN</span><span class="ticker-dot">BALD BY DESIGN</span><span class="ticker-dot">CHAABUK DIMAAG</span><span class="ticker-dot">TO THE MOTU-N</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ORIGIN ============ -->
+<section id="origin" class="relative px-4 sm:px-6 py-24 sm:py-32">
+  <div class="max-w-5xl mx-auto">
+    <div class="reveal text-center mb-16">
+      <span class="font-mono text-xs uppercase tracking-[0.2em] text-gold">The Origin Story</span>
+      <h2 class="font-display font-extrabold text-4xl sm:text-5xl mt-4 tracking-tight">It started with a tweet.</h2>
+    </div>
+
+    <div class="grid md:grid-cols-[1fr_auto_1.1fr] gap-8 md:gap-10 items-start">
+      <!-- timeline -->
+      <div class="reveal space-y-10 order-2 md:order-1">
+        <div class="flex gap-4">
+          <div class="font-mono text-gold/80 text-sm pt-1 shrink-0 w-16">2023</div>
+          <div>
+            <h3 class="font-display font-bold text-lg text-parchment">CZ spots his twin</h3>
+            <p class="mt-2 font-body text-sm text-parchment/60 leading-relaxed">
+              CZ shared a photo of Patlu — the bald, round-glasses sidekick from India's biggest animated show — and pointed out the resemblance himself, four-finger salute and all.
+            </p>
+            <a href="https://x.com/cz_binance/status/1628030662190964736" target="_blank" rel="noopener noreferrer" class="mt-3 inline-flex items-center gap-1.5 font-mono text-xs text-gold hover:text-goldhi spring-fast">
+              View the post on X
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H8M17 7V16"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="flex gap-4">
+          <div class="font-mono text-gold/80 text-sm pt-1 shrink-0 w-16">Since</div>
+          <div>
+            <h3 class="font-display font-bold text-lg text-parchment">The comparison resurfaces</h3>
+            <p class="mt-2 font-body text-sm text-parchment/60 leading-relaxed">
+              Years later the clip found a new audience, ripping through India's crypto community. Binance Square covered the viral moment as proof CZ can take a joke as well as he can run an exchange.
+            </p>
+            <a href="https://www.binance.com/en/square/post/21861660804834" target="_blank" rel="noopener noreferrer" class="mt-3 inline-flex items-center gap-1.5 font-mono text-xs text-gold hover:text-goldhi spring-fast">
+              Read the Binance Square post
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H8M17 7V16"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="flex gap-4">
+          <div class="font-mono text-gold/80 text-sm pt-1 shrink-0 w-16">Now</div>
+          <div>
+            <h3 class="font-display font-bold text-lg text-parchment">The community takes it home</h3>
+            <p class="mt-2 font-body text-sm text-parchment/60 leading-relaxed">
+              $PATLU was born as a fan tribute to the meme — built by the community, for the community. Not an official Binance or CZ project, just a good bit taken to its logical conclusion.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider-dash hidden md:block order-2 mx-auto"></div>
+
+      <!-- proof image -->
+      <div class="reveal order-1 md:order-3">
+        <div class="relative rounded-2xl overflow-hidden noise-border card-shadow spring hover:-translate-y-1.5 hover:rotate-0 rotate-1 bg-coal">
+          <img src="post.png" alt="Screenshot of the viral Motu Patlu scene showing Patlu's resemblance to CZ" class="w-full h-auto object-cover">
+        </div>
+        <p class="mt-3 font-mono text-[11px] text-parchment/40 text-center tracking-wide">THE FRAME THAT STARTED IT ALL</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MEET PATLU ============ -->
+<section id="patlu" class="relative px-4 sm:px-6 py-24 sm:py-32 bg-coal/40 border-y border-gold/10">
+  <div class="max-w-5xl mx-auto">
+    <div class="reveal text-center mb-16">
+      <span class="font-mono text-xs uppercase tracking-[0.2em] text-gold">Who Is Patlu?</span>
+      <h2 class="font-display font-extrabold text-4xl sm:text-5xl mt-4 tracking-tight">The brains of Motu Patlu.</h2>
+      <p class="mt-5 max-w-xl mx-auto font-body text-parchment/60 leading-relaxed">
+        Patlu is one half of India's most-watched cartoon duo, running strong since 2012. Where Motu is big,
+        hungry, and impulsive, Patlu is thin, sharp, and three steps ahead — famous across India for his
+        <span class="text-gold">"chaabuk dimaag"</span> (lightning-fast brain) that gets the pair out of
+        every jam. Bald head. Round glasses. Unbothered expression. Sound familiar?
+      </p>
+    </div>
+
+    <!-- signature: twin comparison card -->
+    <div class="reveal relative rounded-3xl noise-border bg-void/60 card-shadow-lg overflow-hidden">
+      <div class="grid grid-cols-2">
+        <div class="px-5 py-6 sm:px-10 sm:py-8 text-center border-b border-gold/15">
+          <img src="head-trans.png" alt="Patlu" class="h-14 w-14 sm:h-16 sm:w-16 mx-auto object-contain mb-2">
+          <h3 class="font-display font-bold text-lg sm:text-xl text-parchment">Patlu</h3>
+          <p class="font-mono text-[10px] sm:text-xs text-parchment/40 mt-0.5">MOTU PATLU UNIVERSE</p>
+        </div>
+        <div class="px-5 py-6 sm:px-10 sm:py-8 text-center border-b border-l border-gold/15">
+          <img src="cz-trans.png" alt="CZ" class="h-14 w-14 sm:h-16 sm:w-16 mx-auto object-contain mb-2">
+          <h3 class="font-display font-bold text-lg sm:text-xl text-parchment">Changpeng Zhao</h3>
+          <p class="font-mono text-[10px] sm:text-xs text-parchment/40 mt-0.5">BINANCE FOUNDER</p>
+        </div>
+      </div>
+
+      <div class="divide-y divide-gold/10">
+        <div class="grid grid-cols-2">
+          <div class="px-5 py-4 sm:px-10 sm:py-5 font-body text-sm sm:text-base text-parchment/75">Bald head</div>
+          <div class="px-5 py-4 sm:px-10 sm:py-5 font-body text-sm sm:text-base text-parchment/75 border-l border-gold/10">Bald head</div>
+        </div>
+        <div class="grid grid-cols-2">
+          <div class="px-5 py-4 sm:px-10 sm:py-5 font-body text-sm sm:text-base text-parchment/75">Round glasses</div>
+          <div class="px-5 py-4 sm:px-10 sm:py-5 font-body text-sm sm:text-base text-parchment/75 border-l border-gold/10">Round glasses</div>
+        </div>
+        <div class="grid grid-cols-2">
+          <div class="px-5 py-4 sm:px-10 sm:py-5 font-body text-sm sm:text-base text-parchment/75">Calm under pressure</div>
+          <div class="px-5 py-4 sm:px-10 sm:py-5 font-body text-sm sm:text-base text-parchment/75 border-l border-gold/10">Calm under pressure</div>
+        </div>
+        <div class="grid grid-cols-2">
+          <div class="px-5 py-4 sm:px-10 sm:py-5 font-body text-sm sm:text-base text-parchment/75">Chaabuk-fast brain</div>
+          <div class="px-5 py-4 sm:px-10 sm:py-5 font-body text-sm sm:text-base text-parchment/75 border-l border-gold/10">Built the world's biggest exchange</div>
+        </div>
+        <div class="grid grid-cols-2">
+          <div class="px-5 py-4 sm:px-10 sm:py-5 font-body text-sm sm:text-base text-parchment/75">Best friend: Motu</div>
+          <div class="px-5 py-4 sm:px-10 sm:py-5 font-body text-sm sm:text-base text-parchment/75 border-l border-gold/10">Best friend: the whole timeline</div>
+        </div>
+        <div class="grid grid-cols-2">
+          <div class="px-5 py-4 sm:px-10 sm:py-5 font-body text-sm sm:text-base text-gold/90">"Chaabuk hai dimaag mera!"</div>
+          <div class="px-5 py-4 sm:px-10 sm:py-5 font-body text-sm sm:text-base text-gold/90 border-l border-gold/10">✌️✌️ the famous "4"</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ JOIN / CTA ============ -->
+<section id="join" class="relative px-4 sm:px-6 py-24 sm:py-28">
+  <div class="max-w-3xl mx-auto text-center reveal">
+    <img src="head-trans.png" alt="$PATLU" class="h-16 w-16 mx-auto object-contain mb-6 drop-shadow-[0_0_20px_rgba(240,185,11,0.4)]">
+    <h2 class="font-display font-extrabold text-3xl sm:text-4xl tracking-tight">The meme. The myth. The twin.</h2>
+    <p class="mt-4 font-body text-parchment/60 max-w-md mx-auto leading-relaxed">
+      No presale, no roadmap promises — just a community coin for people who saw the resemblance
+      before the memes did.
+    </p>
+
+    <div class="mt-9 inline-flex flex-col sm:flex-row items-center gap-3 rounded-2xl noise-border bg-coal/70 p-2 card-shadow">
+      <span class="font-mono text-xs sm:text-sm text-parchment/50 px-4 py-2">CONTRACT ADDRESS</span>
+      <span class="font-mono text-xs sm:text-sm text-gold px-4 py-2 rounded-xl bg-void/60 border border-gold/15">Coming soon</span>
+    </div>
+
+    <p class="mt-6 font-mono text-[11px] text-parchment/35 tracking-wide">
+      $PATLU IS A FAN-MADE MEME PROJECT — NOT AFFILIATED WITH BINANCE, CZ, OR COSMOS-MAYA
+    </p>
+  </div>
+</section>
+
+<!-- ============ DISCLAIMER ============ -->
+<section id="disclaimer" class="px-4 sm:px-6 pb-10">
+  <div class="max-w-4xl mx-auto reveal">
+    <div class="rounded-2xl border border-rust/25 bg-rust/[0.06] px-6 py-6 sm:px-8 sm:py-7">
+      <h3 class="font-mono text-xs uppercase tracking-[0.18em] text-rust/90 mb-3">Risk Disclaimer</h3>
+      <p class="font-body text-xs sm:text-sm text-parchment/50 leading-relaxed">
+        $PATLU is a community-created meme token made purely for entertainment. It is not affiliated with,
+        endorsed by, or officially connected to Binance, Changpeng Zhao (CZ), Motu Patlu, or Cosmos-Maya
+        in any capacity. Memecoins are highly speculative and volatile assets that carry a real risk of
+        total and permanent loss — they are typically driven by community sentiment rather than
+        underlying fundamentals or utility. Nothing on this site constitutes financial, investment, or
+        legal advice. Always do your own research, never invest more than you can afford to lose, and
+        independently verify any contract address before transacting.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="px-4 sm:px-6 py-10 border-t border-gold/10">
+  <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-5">
+    <a href="#top" class="flex items-center gap-2.5">
+      <img src="head-trans.png" alt="$PATLU" class="h-7 w-7 object-contain">
+      <span class="font-display font-bold text-sm text-parchment/70">$PATLU</span>
+    </a>
+    <div class="flex items-center gap-6 font-mono text-xs text-parchment/40">
+      <a href="#origin" class="hover:text-gold spring-fast">Origin</a>
+      <a href="#patlu" class="hover:text-gold spring-fast">Meet Patlu</a>
+      <a href="#disclaimer" class="hover:text-gold spring-fast">Disclaimer</a>
+    </div>
+    <p class="font-mono text-[11px] text-parchment/30">© 2026 $PATLU · made for the memes</p>
+  </div>
+</footer>
+
+<script>
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.01, rootMargin: '0px 0px 200px 0px' });
+  revealEls.forEach(el => io.observe(el));
+  // Fallback for automated captures / edge cases where IO doesn't fire in time.
+  window.addEventListener('load', () => {
+    setTimeout(() => revealEls.forEach(el => el.classList.add('in')), 300);
+  });
+
+  // The source GLBs come out of Meshy AI with high-metalness/low-roughness
+  // materials, which reads as wet plastic under any studio lighting. Flatten
+  // them to a matte, toy-figurine finish once each model has loaded.
+  document.querySelectorAll('model-viewer.matte-model').forEach((mv) => {
+    mv.addEventListener('load', () => {
+      const materials = mv.model?.materials || [];
+      materials.forEach((mat) => {
+        mat.pbrMetallicRoughness.setMetallicFactor(0.05);
+        mat.pbrMetallicRoughness.setRoughnessFactor(0.9);
+        // The CZ source texture has a noisy/marbled bake — mute its contrast
+        // by darkening the base color multiply slightly.
+        if (mv.id === 'cz-model') {
+          const [r, g, b, a] = mat.pbrMetallicRoughness.baseColorFactor;
+          mat.pbrMetallicRoughness.setBaseColorFactor([r * 0.72, g * 0.72, b * 0.72, a]);
+        }
+      });
+    });
+  });
+</script>
+</body>
+</html>
